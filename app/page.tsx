@@ -1127,6 +1127,7 @@ export default function BetterWriteDB() {
                 onKeyUp={updateCursorPosition}
                 onClick={updateCursorPosition}
                 readOnly={vimModeEnabled && vimMode !== "insert"}
+                suppressHydrationWarning
               />
 
               {/* Block cursor for Vim normal mode */}
@@ -1235,7 +1236,9 @@ export default function BetterWriteDB() {
                 className={`flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs ${mutedTextColor}`}
               >
                 <Clock className="h-3.5 w-3.5" />
-                <span className="font-medium">{formatTime()}</span>
+                <span className="font-medium" suppressHydrationWarning>
+                  {formatTime()}
+                </span>
               </div>
               <div className="mx-1 h-4 w-px bg-border" />
               <button
