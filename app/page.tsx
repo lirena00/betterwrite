@@ -18,11 +18,22 @@ import {
   Command as CommandIcon,
   PanelRight,
   Github,
+  ListChecks,
+  Check,
+  X,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { db, type Note } from "@/lib/db";
 import { useDebounce } from "use-debounce";
 import { Command } from "cmdk";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const FONTS = ["Lato", "Inter", "System", "Georgia", "JetBrains Mono"];
 
@@ -47,6 +58,10 @@ export default function BetterWriteDB() {
   const [commandMenuOpen, setCommandMenuOpen] = useState(false);
   const [githubStars, setGithubStars] = useState<number | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [selectedNotes, setSelectedNotes] = useState<Set<number>>(new Set());
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [noteToDelete, setNoteToDelete] = useState<number | null>(null);
 
   const { theme, setTheme } = useTheme();
 
@@ -1015,15 +1030,57 @@ export default function BetterWriteDB() {
 
   const deleteNote = async (noteIdToDelete: number, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (confirm("Delete this note?")) {
-      await db.notes.delete(noteIdToDelete);
+    setNoteToDelete(noteIdToDelete);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDeleteNote = async () => {
+    if (noteToDelete !== null) {
+      await db.notes.delete(noteToDelete);
       const notes = await db.notes.orderBy("createdAt").reverse().toArray();
       setAllNotes(notes);
-      if (noteId === noteIdToDelete) {
+      if (noteId === noteToDelete) {
         handleNewEntry();
       }
+      setNoteToDelete(null);
+      setDeleteDialogOpen(false);
     }
   };
+
+  const deleteMultipleNotes = async () => {
+    if (selectedNotes.size > 0) {
+      await db.notes.bulkDelete(Array.from(selectedNotes));
+      const notes = await db.notes.orderBy("createdAt").reverse().toArray();
+      setAllNotes(notes);
+      if (noteId !== null && selectedNotes.has(noteId)) {
+        handleNewEntry();
+      }
+      setSelectedNotes(new Set());
+      setIsSelectionMode(false);
+      setDeleteDialogOpen(false);
+    }
+  };
+
+  const toggleNoteSelection = (noteId: number) => {
+    setSelectedNotes((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(noteId)) {
+        newSet.delete(noteId);
+      } else {
+        newSet.add(noteId);
+      }
+      return newSet;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedNotes.size === filteredNotes.length) {
+      setSelectedNotes(new Set());
+    } else {
+      setSelectedNotes(new Set(filteredNotes.map((note) => note.id!)));
+    }
+  };
+
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
@@ -1362,17 +1419,68 @@ export default function BetterWriteDB() {
                   )}
                 </a>
               </div>
-              <div className="relative">
-                <Search
-                  className={`absolute top-1/2 left-3 h-3.5 w-3.5 -translate-y-1/2 ${mutedTextColor}`}
-                />
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className={`w-full rounded-md border ${sidebarBorder} ${bgColor} py-1.5 pr-3 pl-9 text-sm ${textColor} outline-none placeholder:${mutedTextColor} transition-all focus:border-border`}
-                />
+              {isSelectionMode && (
+                <div className="flex items-center justify-between gap-2 mb-3 p-2 rounded-md bg-accent/50">
+                  <button
+                    onClick={toggleSelectAll}
+                    className={`flex items-center gap-1.5 text-xs ${textColor} hover:opacity-80`}
+                  >
+                    <div
+                      className={`w-4 h-4 rounded border-2 flex items-center justify-center ${selectedNotes.size === filteredNotes.length ? "bg-primary border-primary" : "border-muted-foreground"}`}
+                    >
+                      {selectedNotes.size === filteredNotes.length && (
+                        <Check className="h-3 w-3 text-primary-foreground" />
+                      )}
+                    </div>
+                    Select All ({selectedNotes.size})
+                  </button>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => {
+                        setNoteToDelete(null);
+                        setDeleteDialogOpen(true);
+                      }}
+                      disabled={selectedNotes.size === 0}
+                      className={`rounded-md p-1.5 transition-colors ${selectedNotes.size > 0 ? "text-red-500 hover:bg-red-500/10" : "text-muted-foreground opacity-50"}`}
+                      title="Delete selected"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      onClick={() => {
+                        setIsSelectionMode(false);
+                        setSelectedNotes(new Set());
+                      }}
+                      className={`rounded-md p-1.5 transition-colors ${mutedTextColor} hover:${textColor}`}
+                      title="Cancel selection"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                </div>
+              )}
+              <div className="relative flex items-center gap-2">
+                <div className="flex-1 relative">
+                  <Search
+                    className={`absolute top-1/2 left-3 h-3.5 w-3.5 -translate-y-1/2 ${mutedTextColor}`}
+                  />
+                  <input
+                    type="text"
+                    placeholder="Search..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className={`w-full rounded-md border ${sidebarBorder} ${bgColor} py-1.5 pr-3 pl-9 text-sm ${textColor} outline-none placeholder:${mutedTextColor} transition-all focus:border-border`}
+                  />
+                </div>
+                {filteredNotes.length > 0 && (
+                  <button
+                    onClick={() => setIsSelectionMode(!isSelectionMode)}
+                    className={`rounded-md p-1.5 transition-colors ${isSelectionMode ? "bg-accent text-foreground" : `${mutedTextColor} hover:${textColor}`}`}
+                    title={isSelectionMode ? "Exit selection mode" : "Select multiple notes"}
+                  >
+                    <ListChecks className="h-3.5 w-3.5" />
+                  </button>
+                )}
               </div>
             </div>
 
@@ -1395,22 +1503,42 @@ export default function BetterWriteDB() {
                 <div className="px-3">
                   {filteredNotes.map((note, index) => {
                     const isActive = noteId === note.id;
+                    const isSelected = selectedNotes.has(note.id!);
                     return (
                       <div
                         key={note.id}
                         className={`group relative transition-all duration-200 animate-fadeIn rounded-md mb-1 ${
-                          isActive ? "bg-accent/50" : ""
+                          isActive ? "bg-accent/50" : isSelected ? "bg-accent/30" : ""
                         }`}
                         style={{ animationDelay: `${index * 30}ms` }}
                       >
                         <div
-                          className={`flex items-start justify-between gap-2 w-full px-3 py-2.5 transition-colors rounded-md ${
-                            isActive ? "" : hoverBg
+                          className={`flex items-start gap-2 w-full px-3 py-2.5 transition-colors rounded-md ${
+                            isActive || isSelected ? "" : hoverBg
                           }`}
                         >
+                          {isSelectionMode && (
+                            <button
+                              onClick={() => toggleNoteSelection(note.id!)}
+                              className="flex-shrink-0 mt-0.5"
+                            >
+                              <div
+                                className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-colors ${
+                                  isSelected
+                                    ? "bg-primary border-primary"
+                                    : "border-muted-foreground"
+                                }`}
+                              >
+                                {isSelected && (
+                                  <Check className="h-3 w-3 text-primary-foreground" />
+                                )}
+                              </div>
+                            </button>
+                          )}
                           <button
-                            onClick={() => loadNote(note)}
+                            onClick={() => !isSelectionMode && loadNote(note)}
                             className="flex-1 min-w-0 text-left"
+                            disabled={isSelectionMode}
                           >
                             <div
                               className={`text-sm truncate mb-0.5 ${
@@ -1423,13 +1551,15 @@ export default function BetterWriteDB() {
                               {getRelativeTime(new Date(note.updatedAt))}
                             </div>
                           </button>
-                          <button
-                            onClick={(e) => deleteNote(note.id!, e)}
-                            className={`rounded-md p-1 opacity-0 transition-all group-hover:opacity-100 ${mutedTextColor} hover:text-red-500`}
-                            title="Delete note"
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </button>
+                          {!isSelectionMode && (
+                            <button
+                              onClick={(e) => deleteNote(note.id!, e)}
+                              className={`rounded-md p-1 opacity-0 transition-all group-hover:opacity-100 ${mutedTextColor} hover:text-red-500`}
+                              title="Delete note"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          )}
                         </div>
                       </div>
                     );
@@ -1575,6 +1705,45 @@ export default function BetterWriteDB() {
           </Command.Group>
         </Command.List>
       </Command.Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {noteToDelete !== null ? "Delete Note?" : "Delete Multiple Notes?"}
+            </DialogTitle>
+            <DialogDescription>
+              {noteToDelete !== null
+                ? "This action cannot be undone. This will permanently delete this note from your local storage."
+                : `This action cannot be undone. This will permanently delete ${selectedNotes.size} ${selectedNotes.size === 1 ? "note" : "notes"} from your local storage.`}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <button
+              onClick={() => {
+                setDeleteDialogOpen(false);
+                setNoteToDelete(null);
+              }}
+              className={`rounded-lg px-4 py-2 text-sm transition-colors ${mutedTextColor} hover:${textColor} hover:bg-accent`}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => {
+                if (noteToDelete !== null) {
+                  confirmDeleteNote();
+                } else {
+                  deleteMultipleNotes();
+                }
+              }}
+              className="rounded-lg bg-red-500 px-4 py-2 text-sm text-white transition-colors hover:bg-red-600"
+            >
+              Delete
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
