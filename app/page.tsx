@@ -23,7 +23,7 @@ import { db, type Note } from "@/lib/db";
 import { useDebounce } from "use-debounce";
 import { Command } from "cmdk";
 
-const FONTS = ["Lato", "Arial", "System", "Serif", "JetBrains Mono", "Random"];
+const FONTS = ["Lato", "Inter", "System", "Georgia", "JetBrains Mono"];
 
 type VimMode = "normal" | "insert" | "visual" | "command";
 
@@ -582,16 +582,14 @@ export default function BetterWriteDB() {
         switch (selectedFont) {
           case "Lato":
             return "Lato, sans-serif";
-          case "Arial":
-            return "Arial, sans-serif";
+          case "Inter":
+            return "Inter, system-ui, sans-serif";
           case "System":
             return "system-ui, -apple-system, sans-serif";
-          case "Serif":
+          case "Georgia":
             return "Georgia, serif";
           case "JetBrains Mono":
             return "'JetBrains Mono', 'Courier New', monospace";
-          case "Random":
-            return "Comic Sans MS, cursive";
           default:
             return "Lato, sans-serif";
         }
@@ -963,16 +961,14 @@ export default function BetterWriteDB() {
     switch (selectedFont) {
       case "Lato":
         return "Lato, sans-serif";
-      case "Arial":
-        return "Arial, sans-serif";
+      case "Inter":
+        return "Inter, system-ui, sans-serif";
       case "System":
         return "system-ui, -apple-system, sans-serif";
-      case "Serif":
+      case "Georgia":
         return "Georgia, serif";
       case "JetBrains Mono":
         return "'JetBrains Mono', 'Courier New', monospace";
-      case "Random":
-        return "Comic Sans MS, cursive";
       default:
         return "Lato, sans-serif";
     }
