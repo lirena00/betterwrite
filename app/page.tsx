@@ -1168,13 +1168,13 @@ export default function BetterWriteDB() {
       className={`flex h-screen overflow-hidden ${bgColor} transition-colors duration-200`}
     >
       <div className="flex flex-1 flex-col h-full">
-        <div className="flex-1 overflow-y-auto overflow-x-hidden px-8 py-12 scrollbar-hide">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 sm:px-6 md:px-8 py-6 sm:py-8 md:py-12 scrollbar-hide">
           <div className="mx-auto max-w-4xl">
             <input
               type="text"
-              className={`mb-12 w-full resize-none border-none bg-transparent font-bold ${textColor} outline-none placeholder:${mutedTextColor} transition-all`}
+              className={`mb-6 sm:mb-8 md:mb-12 w-full resize-none border-none bg-transparent font-bold ${textColor} outline-none placeholder:${mutedTextColor} transition-all`}
               style={{
-                fontSize: `${Math.round(fontSize * 2)}px`,
+                fontSize: `${Math.round(fontSize * 1.5)}px`,
                 fontFamily: getFontFamily(),
                 lineHeight: "1.2",
               }}
@@ -1186,7 +1186,7 @@ export default function BetterWriteDB() {
             <div className="relative">
               <textarea
                 ref={textAreaRef}
-                className={`min-h-[calc(100vh-240px)] w-full resize-none border-none bg-transparent ${textColor} outline-none placeholder:${mutedTextColor} transition-all`}
+                className={`min-h-[calc(100vh-200px)] sm:min-h-[calc(100vh-240px)] w-full resize-none border-none bg-transparent ${textColor} outline-none placeholder:${mutedTextColor} transition-all`}
                 style={{
                   fontSize: `${fontSize}px`,
                   fontFamily: getFontFamily(),
@@ -1237,9 +1237,9 @@ export default function BetterWriteDB() {
         </div>
 
         {vimModeEnabled && (
-          <div className="fixed bottom-16 left-8 flex items-center gap-2 animate-fadeIn">
+          <div className="fixed bottom-14 sm:bottom-16 left-4 sm:left-8 flex items-center gap-2 animate-fadeIn z-40">
             <div
-              className={`rounded-lg px-4 py-1.5 text-xs font-mono font-semibold shadow-lg backdrop-blur-sm ${
+              className={`rounded-lg px-2.5 sm:px-4 py-1 sm:py-1.5 text-xs font-mono font-semibold shadow-lg backdrop-blur-sm ${
                 vimMode === "normal"
                   ? "bg-blue-500/90 text-white"
                   : vimMode === "insert"
@@ -1266,29 +1266,31 @@ export default function BetterWriteDB() {
         )}
 
         <footer
-          className={`border-t ${borderColor} ${bgColor}/80 backdrop-blur-md px-6 py-3`}
+          className={`border-t ${borderColor} ${bgColor}/80 backdrop-blur-md px-3 sm:px-4 md:px-6 py-2 sm:py-3`}
         >
-          <div className="mx-auto flex max-w-6xl items-center justify-between">
-            <div className={`flex items-center gap-2 ${mutedTextColor}`}>
-              <button
-                onClick={() => setFontSize((prev) => Math.max(prev - 2, 12))}
-                className={`rounded-lg p-2 transition-colors ${hoverBg} ${buttonHover}`}
-                title="Decrease font size"
-              >
-                <ZoomOut className="h-4 w-4" />
-              </button>
-              <span className="px-2 text-xs font-medium min-w-12 text-center">
-                {fontSize}px
-              </span>
-              <button
-                onClick={() => setFontSize((prev) => Math.min(prev + 2, 48))}
-                className={`rounded-lg p-2 transition-colors ${hoverBg} ${buttonHover}`}
-                title="Increase font size"
-              >
-                <ZoomIn className="h-4 w-4" />
-              </button>
-              <div className="mx-2 h-4 w-px bg-border" />
+          <div className="mx-auto flex max-w-6xl items-center justify-between flex-wrap gap-2">
+            <div className={`flex items-center gap-1 sm:gap-2 ${mutedTextColor} flex-wrap`}>
               <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setFontSize((prev) => Math.max(prev - 2, 12))}
+                  className={`rounded-lg p-1.5 sm:p-2 transition-colors ${hoverBg} ${buttonHover}`}
+                  title="Decrease font size"
+                >
+                  <ZoomOut className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                </button>
+                <span className="px-1 sm:px-2 text-xs font-medium min-w-10 sm:min-w-12 text-center">
+                  {fontSize}px
+                </span>
+                <button
+                  onClick={() => setFontSize((prev) => Math.min(prev + 2, 48))}
+                  className={`rounded-lg p-1.5 sm:p-2 transition-colors ${hoverBg} ${buttonHover}`}
+                  title="Increase font size"
+                >
+                  <ZoomIn className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                </button>
+              </div>
+              <div className="hidden md:flex mx-2 h-4 w-px bg-border" />
+              <div className="hidden lg:flex items-center gap-1">
                 <Type className="h-4 w-4 mr-1" />
                 {FONTS.map((font) => (
                   <button
@@ -1307,116 +1309,135 @@ export default function BetterWriteDB() {
               </div>
             </div>
 
-            <div className={`flex items-center gap-2 ${mutedTextColor}`}>
+            <div className={`flex items-center gap-1 sm:gap-2 ${mutedTextColor}`}>
               <div
-                className={`flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs ${mutedTextColor}`}
+                className={`hidden sm:flex items-center gap-2 rounded-lg px-2 sm:px-3 py-1 sm:py-1.5 text-xs ${mutedTextColor}`}
               >
                 <Clock className="h-3.5 w-3.5" />
                 <span className="font-medium" suppressHydrationWarning>
                   {formatTime()}
                 </span>
               </div>
-              <div className="mx-1 h-4 w-px bg-border" />
+              <div className="hidden sm:block mx-1 h-4 w-px bg-border" />
               <button
                 onClick={() => setCommandMenuOpen(true)}
-                className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs transition-colors ${hoverBg} ${buttonHover}`}
+                className={`hidden sm:flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs transition-colors ${hoverBg} ${buttonHover}`}
                 title="Open command palette"
               >
-                <CommandIcon className="h-4 w-4" />
+                <CommandIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               </button>
               <button
                 onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-                className={`rounded-lg p-2 transition-colors ${hoverBg} ${buttonHover}`}
+                className={`rounded-lg p-1.5 sm:p-2 transition-colors ${hoverBg} ${buttonHover}`}
                 title={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
                 suppressHydrationWarning
               >
                 {!mounted ? (
-                  <Sun className="h-4 w-4" />
+                  <Sun className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 ) : theme === "light" ? (
-                  <Moon className="h-4 w-4" />
+                  <Moon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 ) : (
-                  <Sun className="h-4 w-4" />
+                  <Sun className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 )}
               </button>
               <button
                 onClick={toggleVimMode}
-                className={`rounded-lg p-2 transition-colors ${hoverBg} ${
+                className={`hidden sm:flex rounded-lg p-1.5 sm:p-2 transition-colors ${hoverBg} ${
                   vimModeEnabled
                     ? "bg-accent text-foreground"
                     : `${buttonHover}`
                 }`}
                 title="Toggle Vim mode"
               >
-                <Terminal className="h-4 w-4" />
+                <Terminal className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               </button>
               <button
                 onClick={handleNewEntry}
-                className={`rounded-lg p-2 transition-colors ${hoverBg} ${buttonHover}`}
+                className={`rounded-lg p-1.5 sm:p-2 transition-colors ${hoverBg} ${buttonHover}`}
                 title="New note"
               >
-                <Plus className="h-4 w-4" />
+                <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               </button>
               <button
                 onClick={toggleFullscreen}
-                className={`rounded-lg p-2 transition-colors ${hoverBg} ${buttonHover}`}
+                className={`hidden md:flex rounded-lg p-1.5 sm:p-2 transition-colors ${hoverBg} ${buttonHover}`}
                 title="Toggle fullscreen"
               >
-                <Maximize2 className="h-4 w-4" />
+                <Maximize2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               </button>
               <button
                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                className={`rounded-lg p-2 transition-colors ${hoverBg} ${
+                className={`rounded-lg p-1.5 sm:p-2 transition-colors ${hoverBg} ${
                   isSidebarOpen ? "bg-accent text-foreground" : `${buttonHover}`
                 }`}
                 title="Toggle notes sidebar"
               >
-                <PanelRight className="h-4 w-4" />
+                <PanelRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               </button>
             </div>
           </div>
         </footer>
       </div>
 
+      {/* Mobile overlay when sidebar is open */}
+      {isSidebarOpen && (
+        <div
+          className="md:hidden fixed inset-0 bg-black/50 z-40 transition-opacity duration-300"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       <div
-        className={`relative flex h-full border-l ${sidebarBorder} ${sidebarBg} transition-all duration-300 ease-in-out overflow-hidden ${
-          isSidebarOpen ? "w-80" : "w-0"
+        className={`relative flex h-full border-l ${sidebarBorder} ${sidebarBg} transition-all duration-300 ease-in-out overflow-hidden z-50 ${
+          isSidebarOpen
+            ? "fixed md:relative inset-y-0 right-0 w-full sm:w-96 md:w-80 shadow-2xl md:shadow-none"
+            : "w-0"
         }`}
       >
         {isSidebarOpen && (
           <div className="flex w-full flex-col h-full animate-slideIn">
-            <div className={`p-6 pb-4 ${bgColor}`}>
-              <div className="flex items-center justify-between gap-3 mb-4">
-                <div className="flex items-center gap-2.5">
+            <div className={`p-4 sm:p-6 pb-4 ${bgColor}`}>
+              <div className="flex items-center justify-between gap-2 sm:gap-3 mb-4">
+                <div className="flex items-center gap-2 sm:gap-2.5">
                   <Image
                     src={
                       theme === "dark" ? "/dark_logo.png" : "/light_logo.png"
                     }
                     alt="BetterWrite Logo"
-                    width={28}
-                    height={28}
-                    className="flex-shrink-0"
+                    width={24}
+                    height={24}
+                    className="flex-shrink-0 sm:w-7 sm:h-7"
                   />
                   <h2
-                    className={`text-lg font-semibold tracking-tight ${textColor}`}
+                    className={`text-base sm:text-lg font-semibold tracking-tight ${textColor}`}
                     style={{ fontFamily: "'JetBrains Mono', monospace" }}
                   >
                     BetterWrite
                   </h2>
                 </div>
-                <a
-                  href="https://github.com/ronitrajfr/betterwrite"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`flex items-center gap-1.5 rounded-md px-2 py-1 transition-all ${mutedTextColor} hover:${textColor} hover:bg-accent`}
-                  title="Star on GitHub"
-                >
-                  <Github className="h-3.5 w-3.5" />
-                  {githubStars !== null && (
-                    <span className="text-xs font-medium">
-                      {githubStars.toLocaleString()}
-                    </span>
-                  )}
-                </a>
+                <div className="flex items-center gap-1">
+                  <a
+                    href="https://github.com/ronitrajfr/betterwrite"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`flex items-center gap-1 sm:gap-1.5 rounded-md px-1.5 sm:px-2 py-1 transition-all ${mutedTextColor} hover:${textColor} hover:bg-accent`}
+                    title="Star on GitHub"
+                  >
+                    <Github className="h-3.5 w-3.5" />
+                    {githubStars !== null && (
+                      <span className="hidden sm:inline text-xs font-medium">
+                        {githubStars.toLocaleString()}
+                      </span>
+                    )}
+                  </a>
+                  <button
+                    onClick={() => setIsSidebarOpen(false)}
+                    className={`md:hidden rounded-md p-1 transition-colors ${mutedTextColor} hover:${textColor}`}
+                    title="Close sidebar"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
               {isSelectionMode && (
                 <div className="flex items-center justify-between gap-2 mb-3 p-2 rounded-md bg-accent/50">
