@@ -1029,11 +1029,6 @@ export default function BetterWriteDB() {
   // Command menu keybinding - only active when vim mode is disabled or in insert mode
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
-      // Don't trigger if vim mode is enabled and not in insert mode
-      if (vimModeEnabled && vimMode !== "insert") {
-        return;
-      }
-
       // Ctrl/Cmd+K - Open command menu
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
